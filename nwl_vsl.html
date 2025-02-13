@@ -1,0 +1,650 @@
+<!-- <!DOCTYPE html>
+<html>
+    <head>
+        <title>NWL and VSL tasks</title>
+        <!-- load plugins -->
+        <script src="jspsych/jspsych.js"></script>
+        <script src="jspsych/plugin-preload.js"></script>
+        <script src="jspsych/plugin-animation.js"></script>
+        <script src="jspsych/plugin-survey-text.js"></script>
+        <script src="jspsych/plugin-html-keyboard-response.js"></script>
+        <script src="jspsych/plugin-fullscreen-italian.js"></script>
+        <!-- load stimuli -->
+        <script src="stimuli_72_trials_final.js"></script>
+        <script src="stim_afc_72_trials_rot1.js"></script>
+        <script src="stim_afc_72_trials_rot2.js"></script>
+        <script src="vsl-pattern-rec.js"></script>
+        <script src="vsl-pattern-com.js"></script>
+        <script src="vsl_task_variables.js"></script>
+        <!-- load css -->
+        <link href="jspsych/jspsych.css" rel="stylesheet" type="text/css" />
+        <link href="my_style.css" rel="stylesheet">
+
+
+    </head>
+    <body></body>
+    <script>
+            const jsPsych = initJsPsych({
+                on_finish: function(){
+                    window.location = "https://app.prolific.co/submissions/complete?cc=21A0BA04"
+                }
+            });
+
+            ////////////////////////////
+            // NWL part
+            ////////////////////////////
+
+            //define the timeline
+            const timeline = [];
+
+            // // // capture info from Prolific
+            var subject_id = jsPsych.data.getURLVariable('PROLIFIC_PID');
+
+            // add subject id to the output
+            jsPsych.data.addProperties({
+                subject_id: subject_id
+            });
+
+            // get run_id for 2afc rotation assignment
+            try{
+                var my_run_id = RUN_ID;
+            }
+            catch(e) {
+                var my_run_id = 0;
+            }
+            console.log('my run id is ' + my_run_id)
+            
+            // bonus variable
+            var bonus = 0;
+
+            
+            // welcome message
+            var welcome = {
+                type: jsPsychHtmlKeyboardResponse,
+                stimulus: "Benvenuto all'esperimento! Premi qualsiasi tasto per continuare.",
+                data: {
+                    my_trial_type: "instructions",
+                },
+                post_trial_gap : 300
+            };
+
+            //push the welcome message to the end of timeline array
+            timeline.push(welcome);
+
+            //add instructions
+            var instructions_nwl = {
+                type: jsPsychHtmlKeyboardResponse,
+                stimulus: `<p style = "text-align: justify; width: 35em; word-wrap: break-word; white-space:pre-line">
+                <br>Questo esperimento consiste di due parti.
+                Durante l'esperimento avrai anche delle pause per riposare.</br>
+                Nella prima parte, stringhe di lettere appariranno al centro dello schermo.
+                Il tuo compito è di leggerle e ricordarle. Dopo aver visto ciascuna stringa, dovrai riscriverla nella casella che apparirà.
+                Premi la barra spaziatrice dopo aver letto la stringa, e poi il tasto <b><i>Enter</i></b> (o clicca su <b><i>Continua</i></b>) per andare avanti nell'esperimento quando avrai finito con la scrittura.
+                Dopo questa fase faremo un semplice test per vedere quante stringhe riesci a ricordarti. Riceverai un bonus di 1 centesimo per ciascuna risposta corretta.
+                Quindi dovrai stare attento!
+                <br>Prima faremo un po' di pratica dove vedrai parole vere.</br>
+                Premi qualsiasi tasto per iniziare.
+                </p>`,
+                data: {
+                    my_trial_type: "instructions",
+                },
+                post_trial_gap : 300
+            };
+
+            //push instructions to timeline
+            timeline.push(instructions_nwl);
+
+
+
+            //////////////////////////////////////////
+            // PRACTICE NWL
+            //////////////////////////////////////////
+
+            //define practice stimuli        
+            var practice_stimuli_nwl = [
+                {word: 'donna'},
+                {word: 'tavolo'},
+                {word: 'tempo'},
+                {word: 'cibo'},
+                {word: 'estate'},
+                {word: 'fiori'}
+            ];
+
+            //define keyboard responses
+            var practice_test_nwl = {
+                type: jsPsychHtmlKeyboardResponse,
+                stimulus: function(){
+                    var stim = `<p style="font-size:40px">${jsPsych.timelineVariable('word')}</p>`
+                    return stim
+                },
+                
+                choices: [' '],
+                data: {
+                    my_trial_type: "practice",
+                    task_type: "nwl"
+                },
+                post_trial_gap : 300
+            };
+
+
+            // practice typeback
+            var practice_typeback_nwl = {
+                type: jsPsychSurveyText,
+                questions: [
+                    {prompt: '', required:true, name:'Q'}
+                ],
+                button_label: 'Continua',
+                choices: ['Enter'],
+                data: {
+                    my_trial_type: "practice",
+                    task_type: "nwl"
+                },
+                post_trial_gap : 300
+            }
+
+
+            //link the stimuli from var test_stimuli to timelineVariable() by creating a NEW timeline
+            var practice_test_procedure_nwl = {
+                timeline: [practice_test_nwl,practice_typeback_nwl],
+                timeline_variables: practice_stimuli_nwl,
+                randomize_order: true
+            };
+
+            //add test_procedure to the original timeline
+            //(no need to add fixation and test because they already exist in test_procedure)
+            timeline.push(practice_test_procedure_nwl);
+
+
+
+            //////////////////////////////////////////
+            // MAIN EXPERIMENT NWL
+            //////////////////////////////////////////
+
+            //add instructions 3
+            var instructions_main_nwl = {
+                type: jsPsychHtmlKeyboardResponse,
+                stimulus: `<p style = "text-align: justify;width: 35em; word-wrap: break-word; white-space:pre-line">
+                Ora inizia l'esperimento vero.
+                <br>Farai esattamente la stessa cosa come nella pratica solo che le stringhe di lettere saranno nuove.</br>
+                Questa parte dura una decina di minuti. In questa fase non sono previste pause. Ti potrai riposare prima dell'inizio della prossima parte dell'esperimento.
+                <br>Premi qualsiasi tasto per iniziare.</br>
+                </p>`,
+                data: {
+                    my_trial_type: "instructions",
+                },
+                post_trial_gap : 300
+            };
+
+            timeline.push(instructions_main_nwl);
+
+
+            var test_stimuli_nwl = stimuli_72_trials_final;
+
+
+            //define keyboard responses; jsPsych.timelineVariable() indicates
+            //that we want to substitute the values of parameters from the timeline variable
+            //if the program needs to know DURING the experiment whether the response is correct, we have to add that pliginAPI.compareKeys()
+            //I guess this is because the output is written as the program proceeds, so everything should be written simultaneously
+            var test_nwl = {
+                type: jsPsychHtmlKeyboardResponse,
+                stimulus: function(){
+                    var stim = `<p style="font-size:40px">${jsPsych.timelineVariable('target')}</p>`
+                    return stim
+                    },
+                choices: [' '],
+                data: {
+                    my_trial_type: "experimental",
+                    task_type: "nwl",
+                    subtask_type: 'reading',
+                    complexity: jsPsych.timelineVariable('complexity'),
+                    },
+                post_trial_gap : 300
+            };
+
+            // type back task
+            var typeback_nwl = {
+                type: jsPsychSurveyText,
+                questions: [
+                    {prompt: '', required:true, name:'Q'}
+                ],
+                button_label: 'Continua',
+                choices: ['Enter'],
+                data: {
+                    my_trial_type: "experimental",
+                    task_type: "nwl",
+                    subtask_type: 'typing',
+                    complexity: jsPsych.timelineVariable('complexity')
+                    },
+                post_trial_gap : 300
+            }
+
+            //link the stimuli from var test_stimuli to timelineVariable() by creating a NEW timeline
+            //repetitions means that the whole trial is repeated 3 times
+            var test_procedure_nwl = {
+                timeline: [test_nwl,typeback_nwl],
+                timeline_variables: test_stimuli_nwl,
+                randomize_order: true,
+                repetitions : 3 // this means that entire trial is run 3 times, and order of stimuli is randomized each time; this a stimulus can't be repeated too soon
+            };
+
+            //add test_procedure to the original timeline
+            //(no need to add fixation and test because they already exist in test_procedure)
+            timeline.push(test_procedure_nwl);
+
+
+
+
+            /////////////////////////////////////
+            // 2AFC
+            /////////////////////////////////////
+
+            // instructions 2afc
+            var instructions_afc_nwl = {
+                type: jsPsychHtmlKeyboardResponse,
+                stimulus: `<p style = "text-align: justify; width: 35em; word-wrap: break-word; white-space: pre-line">
+                Bene! Ora ti puoi riposare quanto vuoi.
+                Quando sei pronto, puoi iniziare con la fase di testing dell'esperimento.
+                <br>Vedrai di nuovo le stringhe di lettere apparire al centro dello schermo, due alla volta. Devi decidere quale delle due hai visto nel compito precedente.
+                Fai attenzione, perché le stringhe che vedrai ora si differiscono poco.
+                Ad esempio, se hai imparato CATAMPO, potremmo fartelo vedere insieme a CAFAMPO.
+                Se pensi di aver visto quella sulla sinistra, premi il tasto <b><i>d</i></b>.
+                Se pensi di aver visto la stringa sulla destra, premi il tasto <b><i>k</i></b>.</br>
+                Cerca di essere sia accurato che veloce. Ricordati del bonus per la risposta corretta!
+                <br>Prima facciamo un po' di esercizio con delle parole esistenti.
+                Premi il tasto <b><i>d</i></b> se hai visto la stringa sulla sinistra, o <b><i>k</i></b> se ha visto la stringa sulla destra.</br>
+                Premi qualsiasi tasto per iniziare.
+                </p>`,
+                data: {
+                    my_trial_type: "instructions",
+                },
+                post_trial_gap : 300
+            };
+
+            timeline.push(instructions_afc_nwl);
+
+
+            //////////////////////////////////////////
+            // PRACTICE 2AFC
+            //////////////////////////////////////////
+
+            var trial1_p_afc = {
+                type: jsPsychHtmlKeyboardResponse,
+                stimulus: function(){
+                    var stim = `<p style="word-spacing:70px;font-size:40px">tempo telpo</p>
+                                <p style="word-spacing:70px;">D K</p>`;
+                    return stim
+                },
+                choices: ['d','k'],
+                data: {
+                    my_trial_type: "practice",
+                    task_type: "nwl"
+                },
+                on_finish: function(data){
+                    // Score the response as correct or incorrect.
+                    if(jsPsych.pluginAPI.compareKeys(data.response, "d")){
+                    data.correct = 1;
+                    } else {
+                    data.correct = 0; 
+                    }
+                }
+            }
+
+            var trial2_p_afc = {
+                type: jsPsychHtmlKeyboardResponse,
+                stimulus: function(){
+                    var stim = `<p style="word-spacing:70px;font-size:40px">esvate estate</p>
+                                <p style="word-spacing:70px;">D K</p>`;
+                    return stim
+                },
+                choices: ['d','k'],
+                data: {
+                    my_trial_type: "practice",
+                    task_type: "nwl"
+                },
+                on_finish: function(data){
+                    // Score the response as correct or incorrect.
+                    if(jsPsych.pluginAPI.compareKeys(data.response, "k")){
+                    data.correct = 1;
+                    } else {
+                    data.correct = 0; 
+                    }
+                }
+            }
+
+            var trial3_p_afc = {
+                type: jsPsychHtmlKeyboardResponse,
+                stimulus: function(){
+                    var stim = `<p style="word-spacing:70px;font-size:40px">donna ponna</p>
+                                <p style="word-spacing:70px;">D K</p>`;
+                    return stim
+                },
+                choices: ['d','k'],
+                data: {
+                    my_trial_type: "practice",
+                    task_type: "nwl"
+                },
+                on_finish: function(data){
+                    // Score the response as correct or incorrect.
+                    if(jsPsych.pluginAPI.compareKeys(data.response, "d")){
+                    data.correct = 1;
+                    } else {
+                    data.correct = 0; 
+                    }
+                }
+            }
+
+            var trial4_p_afc = {
+                type: jsPsychHtmlKeyboardResponse,
+                stimulus: function(){
+                    var stim = `<p style="word-spacing:70px;font-size:40px">tavolo tapolo</p>
+                                <p style="word-spacing:70px;">D K</p>`;
+                    return stim
+                },
+                choices: ['d','k'],
+                data: {
+                    my_trial_type: "practice",
+                    task_type: "nwl"
+                },
+                on_finish: function(data){
+                    // Score the response as correct or incorrect.
+                    if(jsPsych.pluginAPI.compareKeys(data.response, "d")){
+                    data.correct = 1;
+                    } else {
+                    data.correct = 0; 
+                    }
+                }
+            }
+
+            var feedback = {
+                type: jsPsychHtmlKeyboardResponse,
+                stimulus: function(){
+                    // this function will check the accuracy of the last response and use that information to set
+                    // the stimulus value on each trial.
+                    var last_trial_correct = jsPsych.data.get().last(1).values()[0].correct;
+                    if(last_trial_correct){
+                    return '<p style="font-size:30px;color:green;">Corretto!</p>'; // the parameter value has to be returned from the function
+                    } else {
+                    return '<p style="font-size:30px;color:red;">Sbagliato!</p>'; // the parameter value has to be returned from the function
+                    }
+                }
+            }
+
+            timeline.push(trial1_p_afc,feedback,trial2_p_afc,feedback,trial3_p_afc,feedback,trial4_p_afc,feedback);
+            
+
+            ////////////////////////////////////////////
+            // MAIN 2AFC
+            ///////////////////////////////////////////
+
+            var instructions_afc_main_nwl = {
+                type: jsPsychHtmlKeyboardResponse,
+                stimulus: `
+                <p>Bene! Ora inizia l'esperimento vero.</p>
+                <p>Premi qualsiasi tasto per iniziare.</p>
+                `,
+                data: {
+                    my_trial_type: "instructions",
+                },
+                post_trial_gap : 300
+            };
+
+            timeline.push(instructions_afc_main_nwl);
+
+
+            // assign the rotation based on run_id to counterbalance
+            if (my_run_id %2 == 0) {
+                var stimuli_afc_nwl = stim_afc_72_trials_rot2;
+            } else {
+                var stimuli_afc_nwl = stim_afc_72_trials_rot1;
+            }
+
+
+
+
+
+            //define keyboard responses
+            var afc_test_nwl = {
+                type: jsPsychHtmlKeyboardResponse,
+                stimulus: function(){
+                    var stim = `<p style="word-spacing:70px;font-size:40px">${jsPsych.timelineVariable('left')} ${jsPsych.timelineVariable('right')}</p>
+                                <p style="word-spacing:70px;">D K</p>`;
+                    return stim
+                },
+
+                choices: ['d','k'],
+                data: {
+                    my_trial_type: "experimental",
+                    task_type: "nwl",
+                    subtask_type: 'keyboard_response',
+                    expected_response: jsPsych.timelineVariable('correct_response'),
+                    complexity: jsPsych.timelineVariable('complexity'),
+                    rotation: jsPsych.timelineVariable('rot')},
+                on_finish: function(data){
+                // Score the response as correct or incorrect.
+                if(jsPsych.pluginAPI.compareKeys(data.response,data.expected_response)){
+                data.correct = 1;
+                bonus ++;
+                } else {
+                data.correct = 0;
+                }
+                },
+                post_trial_gap : 300
+            };
+            
+            var afc_test_procedure_nwl = {
+                timeline: [afc_test_nwl],
+                timeline_variables: stimuli_afc_nwl,
+                randomize_order: true
+            };
+
+            timeline.push(afc_test_procedure_nwl);
+
+            var bonus_info = {
+                type: jsPsychHtmlKeyboardResponse,
+                stimulus: function(){ return `<p> Bravo! Hai guadagnato ${bonus} centesimi!</p>` }
+            };
+
+            timeline.push(bonus_info);
+
+
+            ////////////////////////////
+            // VSL part
+            ////////////////////////////
+
+            // Parameters
+            const familiarization_reps = 24;
+            const stim_presentation_time = 800;
+            const inter_stim_time = 200;
+
+            // Create the image paths
+            const image_paths = [];
+            for (let image_i of IMAGE_INDICES) {
+                image_paths.push('vsl_stims/' + image_i + '.jpg');
+            }
+            image_paths.push('vsl_stims/qm.jpg');
+
+            // Generate a random shuffle of the mapping between stimulus indices and images
+            const index_to_image_mapping = jsPsych.randomization.shuffle(IMAGE_INDICES);
+
+            // Generate the familiarization stream (array of image paths to be animated)
+            const familiarization_stream = [];
+            let final_triplet = null;
+            for (let i=0; i<familiarization_reps; i++) {
+                let shuffled_triplets = jsPsych.randomization.shuffle(TRIPLETS);
+                let first_triplet = shuffled_triplets[0];
+                // if first triplet is same as final triplet from previous run, move first
+                // triplet to the end.
+                if (final_triplet && final_triplet.every((v, i) => v === first_triplet[i]))
+                    shuffled_triplets.push(shuffled_triplets.splice(0, 1)[0]);
+                final_triplet = shuffled_triplets[shuffled_triplets.length - 1];
+                for (let triplet of shuffled_triplets) {
+                    for (let stim_i of triplet) {
+                        let image_i = index_to_image_mapping[stim_i];
+                        familiarization_stream.push(image_paths[image_i]);
+                    }
+                }
+            }
+
+            // Translate the pattern recognition trials to the appropriate image paths
+            // based on the shuffled mapping.
+            for (let trial of PATTERN_RECOGNITION_TRIALS) {
+                for (let i=0; i<trial.target.length; i++) {
+                    let stim_i = trial.target[i];
+                    let image_i = index_to_image_mapping[stim_i];
+                    trial.target[i] = image_paths[image_i];
+                }
+                for (let foil of trial.foils) {
+                    for (let i=0; i<foil.length; i++) {
+                        let stim_i = foil[i];
+                        let image_i = index_to_image_mapping[stim_i];
+                        foil[i] = image_paths[image_i];
+                    }
+                }
+            }
+
+            // Translate the pattern completion trials to the appropriate image paths
+            // based on the shuffled mapping.
+            for (let trial of PATTERN_COMPLETION_TRIALS) {
+                for (let i=0; i<trial.probe.length; i++) {
+                    let stim_i = trial.probe[i];
+                    if (stim_i === null)
+                        trial.probe[i] = 'vsl_stims/qm.jpg';
+                    else
+                        trial.probe[i] = image_paths[index_to_image_mapping[stim_i]];
+                }
+                trial.target = image_paths[index_to_image_mapping[trial.target]];
+                for (let i=0; i<trial.foils.length; i++) {
+                    let stim_i = trial.foils[i];
+                    trial.foils[i] = image_paths[index_to_image_mapping[stim_i]];
+                }
+            }
+
+
+        timeline.push({
+            type: jsPsychPreload,
+            images: image_paths,
+        });
+
+        
+        // instructions training
+        var instructions_training = {
+                    type: jsPsychHtmlKeyboardResponse,
+                    stimulus: `<p style = "text-align: justify; width: 35em; word-wrap: break-word; white-space: pre-line">
+                    Ora inizia la seconda parte dell'esperimento.
+                    Riposati pure se sei stanco. 
+                    <br>In questa parte vedrai alcune immagini apparire sullo schermo una dopo l'altra. Questa fase durerà 9.5 minuti.
+                    Devi solo prestare attenzione a loro, senza fare niente.</br>
+                    Stai attento però, perché dopo farai un test per vedere quanto bene te le ricordi. Ricordati di nuovo del bonus!
+                    <br>Quando sei pronto, premi qualsiasi tasto per inizare.</br>
+                    </p>`,
+                    data: {
+                        my_trial_type: "instructions",
+                    },
+                    post_trial_gap : 300
+                    };
+
+        timeline.push(instructions_training);
+
+
+        timeline.push({
+            type: jsPsychAnimation,
+            stimuli: familiarization_stream,
+            frame_time: stim_presentation_time,
+            frame_isi: inter_stim_time
+        });
+
+        
+        // instructions testing pattern recognition
+        var instructions_testing_pat_recognition = {
+                    type: jsPsychHtmlKeyboardResponse,
+                    stimulus: `<p style = "text-align: justify; width: 35em; word-wrap: break-word; white-space: pre-line">
+                    Ora inizia la fase del test.
+                    Anche adesso puoi fare una pausa se vuoi.
+                    <br>In questo test controlleremo se ti ricordi l'ordine in cui le immagini che hai visto nella fase precedente sono apparse.
+                    In ogni domanda vedrai alcune combinazioni di immagini.
+                    Tra le opzioni proposte, devi cliccare su quella che è apparsa nella fase precedente dell'esperimento.</br>
+                    Quando sei pronto, premi qualsiasi tasto per inizare.
+                    </p>`,
+                    data: {
+                        my_trial_type: "instructions",
+                    },
+                    post_trial_gap : 300
+                    };
+
+        timeline.push(instructions_testing_pat_recognition);
+
+        for (let trial of jsPsych.randomization.shuffle(PATTERN_RECOGNITION_TRIALS)) {
+            timeline.push({
+                type: VSLPatternRec,
+                target: trial.target,
+                foils: trial.foils,
+                item_no_target: trial.item_no_target
+            });
+        }
+
+        // instructions testing pattern completion
+        var instructions_testing_pat_completion = {
+                type: jsPsychHtmlKeyboardResponse,
+                stimulus: `<p style = "text-align: justify; width: 35em; word-wrap: break-word; white-space: pre-line">
+                Ora inizia l'ultimo test dell'esperimento.
+                <br>In ogni domanda vedrai di nuovo le combinazioni di immagini dalle quali una manca.
+                L'immagine che manca sarà coperta da un punto di domanda.
+                Tra le tre opzioni proposte devi scegliere e cliccare su quella che completa la combinazione.</br>
+                Quando sei pronto, premi qualsiasi tasto per inizare.
+                </p>`,
+                data: {
+                    my_trial_type: "instructions",
+                },
+                post_trial_gap : 300
+                };
+
+        timeline.push(instructions_testing_pat_completion);
+
+        for (let trial of jsPsych.randomization.shuffle(PATTERN_COMPLETION_TRIALS)) {
+            timeline.push({
+                type: VSLPatternCom,
+                probe: trial.probe,
+                target: trial.target,
+                foils: trial.foils,
+                item_no_target: trial.item_no_target,
+                chance: trial.chance
+            });
+        }
+
+        // comment box
+        var comment_box = {
+                type: jsPsychSurveyText,
+                questions: [
+                    {prompt: `<p style = "text-align: justify; width: 35em; word-wrap: break-word; white-space: pre-line">
+                        Questa è la fine dell'esperimento. Ci interessa se hai notato qualcosa di strano con le parole che hai imparato. O magari se hai notato qualche pattern negli stimoli visivi/forme. Ci interessa anche se hai usato una strategia particolare per ricordarti sia le parole che le forme.</p>`,
+                        required:true, name:'comment', rows:5, columns: 90}
+                ],
+                button_label: 'Ho finito.',
+                choices: ['Enter'],
+                data: {
+                    my_trial_type: "comment",
+                    },
+                post_trial_gap : 300
+            }
+
+            timeline.push(comment_box)
+
+        // instructions testing pattern completion
+        var goodbye_message = {
+                type: jsPsychHtmlKeyboardResponse,
+                stimulus: `<p style = "text-align: justify; width: 35em; word-wrap: break-word; white-space: pre-line">
+                Sei arrivato alla fine dell'esperimento.
+                <br>Sarai ridiretto sulla pagina di Prolific per essere registrato e ricevere le informazioni che riguardano il pagamento.</br>
+                Grazie mille per aver participato! Premi qualsiasi tasto per finire.
+                </p>`,
+                data: {
+                    my_trial_type: "instructions",
+                },
+                post_trial_gap : 300
+                };
+
+        timeline.push(goodbye_message)
+        // Run
+        jsPsych.run(timeline);
+    </script>
+</html> -->
